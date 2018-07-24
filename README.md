@@ -2,7 +2,7 @@
 [![GoDoc](https://godoc.org/github.com/pubnative/consent?status.png)](https://godoc.org/github.com/pubnative/consent)
 [![CircleCI](https://circleci.com/gh/pubnative/consent.svg?style=svg)](https://circleci.com/gh/pubnative/consent)
 
-An [IAB consent][iab] string decoding and encoding.
+A Go library for decoding and encoding [IAB consent][iab] strings.
 
 [iab]: https://github.com/InteractiveAdvertisingBureau/GDPR-Transparency-and-Consent-Framework/blob/68f5e0012a7bdb00867ce9fee57fb67cfe9153e3/Consent%20string%20and%20vendor%20list%20formats%20v1.1%20Final.md
 
@@ -48,5 +48,3 @@ func main() {
 	fmt.Println(c2.String())
 }
 ```
-
-
