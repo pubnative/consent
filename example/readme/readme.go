@@ -22,7 +22,7 @@ func main() {
 
 	fmt.Println(c1.String())
 
-	// Decode existing consent
+	// Decode an existing consent
 	c2, err := consent.Parse("BOQ7WlgOQ7WlgABACDENABwAAABJOACgACAAQABA")
 	if err != nil {
 		fmt.Println(err)
@@ -32,7 +32,7 @@ func main() {
 	fmt.Printf("Last modified: %s, vendors allowed: %v\n",
 		c1.LastUpdated, c1.Vendors)
 
-	// Patch the existing one
+	// Patch an existing consent
 	c2.Vendors[999] = true
 	fmt.Println(c2.String())
 }

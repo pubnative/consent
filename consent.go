@@ -1,7 +1,3 @@
-// Package consent contains IAB consent string encoding and decoding
-// implementation.
-//
-// https://github.com/InteractiveAdvertisingBureau/GDPR-Transparency-and-Consent-Framework/blob/68f5e0012a7bdb00867ce9fee57fb67cfe9153e3/Consent%20string%20and%20vendor%20list%20formats%20v1.1%20Final.md
 package consent
 
 import (
@@ -27,6 +23,9 @@ var (
 )
 
 // Consent is a golang representation of an IAB consent string
+//
+// Implementation is done as per IAB Consent String format v1.1:
+// https://github.com/InteractiveAdvertisingBureau/GDPR-Transparency-and-Consent-Framework/blob/68f5e0012a7bdb00867ce9fee57fb67cfe9153e3/Consent%20string%20and%20vendor%20list%20formats%20v1.1%20Final.md
 type Consent struct {
 	Version           byte
 	Created           time.Time
