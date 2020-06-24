@@ -14,7 +14,7 @@ func main() {
 		str = os.Args[1]
 	}
 
-	c, err := consent.Parse(str)
+	c, err := consent.ParseV1(str)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)

@@ -29,6 +29,14 @@ func (b *bitWriter) AppendBools(bools []bool) {
 	}
 }
 
+func (b *bitWriter) AppendBit(x bool) {
+	var v byte
+	if x {
+		v = 1
+	}
+	b.AppendByte(v, 1)
+}
+
 func (b *bitWriter) AppendBits(bits bitWriter) {
 	for i := range bits.data {
 		b.AppendByte(bits.data[i], 8)
@@ -105,4 +113,13 @@ func (b *bitReader) ReadInt(size uint) (int64, bool) {
 		out = out<<bitSize | int64(v)
 	}
 	return out, true
+}
+
+func (b *bitReader) ReadBit() (bool, bool) {
+	out := false
+	v, ok := b.ReadByte(1)
+	if v > 0 {
+		out = true
+	}
+	return out, ok
 }
