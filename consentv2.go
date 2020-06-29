@@ -7,7 +7,6 @@ import (
 	"time"
 )
 
-
 var ErrInvalidPubRestrictionType = errors.New("consent: invalid pub restriction type")
 
 type ConsentV2 struct {
@@ -19,16 +18,16 @@ type ConsentV2 struct {
 	ConsentLanguage   [2]byte
 	VendorListVersion int
 
-	TcfPolicyVersion  byte
-	IsServiceSpecific bool
-	UseNonStandardStacks bool
-	SpecialFeatureOptIns [12]bool
-	PurposesConsent [24]bool // used to be called PurposesAllowed
+	TcfPolicyVersion       byte
+	IsServiceSpecific      bool
+	UseNonStandardStacks   bool
+	SpecialFeatureOptIns   [12]bool
+	PurposesConsent        [24]bool // used to be called PurposesAllowed
 	PurposesLITransparency [24]bool
 
 	// specific jurisdiction disclosures
 	PurposeOneTreatment bool
-	PublisherCC [2]byte // ISO 3166-1 alpha-2 code, encoded with 6 bits per char
+	PublisherCC         [2]byte // ISO 3166-1 alpha-2 code, encoded with 6 bits per char
 
 	// vendor consent section
 	VendorConsent VendorSet
@@ -41,14 +40,14 @@ type ConsentV2 struct {
 
 	// optional:
 	DisclosedVendors VendorSet
-	AllowedVendors VendorSet
-	PublisherTC *PublisherTC
+	AllowedVendors   VendorSet
+	PublisherTC      *PublisherTC
 }
 
 type PubRestriction struct {
-	PurposeID int
+	PurposeID       int
 	RestrictionType byte
-	Vendors VendorSet
+	Vendors         VendorSet
 }
 
 func (c *ConsentV2) Version() byte {
@@ -57,7 +56,7 @@ func (c *ConsentV2) Version() byte {
 
 type VendorSet struct {
 	maxVendorID int
-	Set map[int]bool
+	Set         map[int]bool
 }
 
 func (c *ConsentV2) String() string {
@@ -159,7 +158,7 @@ func (c *ConsentV2) writeCoreString(b *bitWriter) {
 }
 
 func (c *ConsentV2) ParseCore(binary []byte) error {
-	if len(binary) * 8 < 213 {
+	if len(binary)*8 < 213 {
 		return ErrUnexpectedEnd
 	}
 	b := newBitReader(binary)
@@ -192,13 +191,13 @@ func (c *ConsentV2) ParseCore(binary []byte) error {
 	c.TcfPolicyVersion, _ = b.ReadByte(6)
 	c.IsServiceSpecific, _ = b.ReadBit()
 	c.UseNonStandardStacks, _ = b.ReadBit()
-	for i:= 0; i < 12; i++ {
+	for i := 0; i < 12; i++ {
 		c.SpecialFeatureOptIns[i], _ = b.ReadBit()
 	}
-	for i:= 0; i < 24; i++ {
+	for i := 0; i < 24; i++ {
 		c.PurposesConsent[i], _ = b.ReadBit()
 	}
-	for i:= 0; i < 24; i++ {
+	for i := 0; i < 24; i++ {
 		c.PurposesLITransparency[i], _ = b.ReadBit()
 	}
 	c.PurposeOneTreatment, _ = b.ReadBit()
@@ -227,35 +226,35 @@ func (c *ConsentV2) ParseCore(binary []byte) error {
 
 const (
 	disclosedVendorsType byte = 1
-	allowedVendorsType byte = 2
-	publisherTCType byte = 3
+	allowedVendorsType   byte = 2
+	publisherTCType      byte = 3
 )
 
 type PublisherTC struct {
-	PubPurposesConsent [24]bool // true: consent, false: no consent
-	PubPurposesLITransparency [24]bool // true: legitimate interest established
-	CustomPurposesConsent []bool // consent/no consent
-	CustomPurposesLITransparency []bool // legitimate interest established/not established
+	PubPurposesConsent           [24]bool // true: consent, false: no consent
+	PubPurposesLITransparency    [24]bool // true: legitimate interest established
+	CustomPurposesConsent        []bool   // consent/no consent
+	CustomPurposesLITransparency []bool   // legitimate interest established/not established
 }
 
 func (p *PublisherTC) Write(w *bitWriter) {
-	for _, b := range(p.PubPurposesConsent) {
+	for _, b := range p.PubPurposesConsent {
 		w.AppendBit(b)
 	}
-	for _, b := range(p.PubPurposesLITransparency) {
+	for _, b := range p.PubPurposesLITransparency {
 		w.AppendBit(b)
 	}
 	w.AppendInt(int64(len(p.CustomPurposesConsent)), 6)
-	for _, b := range(p.CustomPurposesConsent) {
+	for _, b := range p.CustomPurposesConsent {
 		w.AppendBit(b)
 	}
 
-	for _, b := range(p.CustomPurposesLITransparency) {
+	for _, b := range p.CustomPurposesLITransparency {
 		w.AppendBit(b)
 	}
 }
 
-func(c *ConsentV2) ParseNonCoreSegment(binary []byte) error {
+func (c *ConsentV2) ParseNonCoreSegment(binary []byte) error {
 	b := newBitReader(binary)
 	segmentType, ok := b.ReadByte(3)
 	if !ok {
@@ -377,11 +376,10 @@ func (c *ConsentV2) Parse(data string) error {
 }
 
 const (
-	RestrictionTypeNotAllowed byte = 0
-	RestrictionTypeRequireConsent byte = 1
+	RestrictionTypeNotAllowed                byte = 0
+	RestrictionTypeRequireConsent            byte = 1
 	RestrictionTypeRequireLegitimateInterest byte = 2
 )
-
 
 func parsePubRestrictions(b *bitReader) ([]PubRestriction, error) {
 	numPubRestrictions, ok := b.ReadInt(12)
@@ -539,12 +537,12 @@ func AppendRange(b *bitWriter, vendorSet map[int]bool, maxVendorID int, numEntri
 				rangeEnd = i
 			}
 			if rangeStart == rangeEnd { // single entry
-				b.AppendByte(0, 1)// isARange
+				b.AppendByte(0, 1)                 // isARange
 				b.AppendInt(int64(rangeStart), 16) // only vendor id
 			} else { // range
-				b.AppendByte(1, 1)// isARange
+				b.AppendByte(1, 1)                 // isARange
 				b.AppendInt(int64(rangeStart), 16) // first vendor id
-				b.AppendInt(int64(rangeEnd), 16) // last vendor id
+				b.AppendInt(int64(rangeEnd), 16)   // last vendor id
 			}
 
 			vendorID = rangeEnd + 1
