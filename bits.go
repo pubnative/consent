@@ -116,10 +116,6 @@ func (b *bitReader) ReadInt(size uint) (int64, bool) {
 }
 
 func (b *bitReader) ReadBit() (bool, bool) {
-	out := false
 	v, ok := b.ReadByte(1)
-	if v > 0 {
-		out = true
-	}
-	return out, ok
+	return v > 0, ok
 }
