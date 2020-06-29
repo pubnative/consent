@@ -8,7 +8,7 @@ A minimalistic Go library to encode and decode [IAB consent][iab] strings.
 
 ### Usage examples
 
-## Version 1
+#### Version 1
 
 ```go
 package main
@@ -51,7 +51,7 @@ func main() {
 }
 ```
 
-## Version 2
+### Version 2
 
 ```go
 	// Decode a consent v2 string
@@ -65,7 +65,7 @@ func main() {
 		cv2.LastUpdated, cv2.VendorConsent)
 ```
 
-## Consent string of unknown version
+### Consent string of unknown version
 
 ```go
 	// decode a consent string without knowing the version beforehand
