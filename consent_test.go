@@ -11,11 +11,11 @@ const (
 
 func TestParseVersion(t *testing.T) {
 	v, err := ParseConsentVersion(csv1)
-	equal(t, nil, err)
+	noError(t, err)
 	equal(t, byte(1), v)
 
 	v, err = ParseConsentVersion(csv2)
-	equal(t, nil, err)
+	noError(t, err)
 	equal(t, byte(2), v)
 
 	v, err = ParseConsentVersion("X32g")
