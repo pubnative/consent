@@ -9,7 +9,7 @@ func TestConsentV2Parse(t *testing.T) {
 	c := ConsentV2{}
 
 	err := c.Parse(s)
-	equal(t, err, nil)
+	noError(t, err)
 	equal(t, int(c.Version()), 2)
 	equal(t, c.Created.String(), "2020-01-26 18:01:00 +0100 CET")
 	equal(t, c.LastUpdated.String(), "2021-02-02 18:01:00 +0100 CET")
@@ -53,7 +53,7 @@ func TestConsentV2ParseDisclosedAndAllowedVendors(t *testing.T) {
 	s := "COrEAV4OrXx94ACABBENAHCIAD-AAAAAAACAAxAAAAgAIAwgAgAAAAEAgQAAAAAEAYQAQAAAACAAAABAAA.IBAgAAAgAIAwgAgAAAAEAAAACA.QAagAQAgAIAwgA"
 	c := ConsentV2{}
 	err := c.Parse(s)
-	equal(t, err, nil)
+	noError(t, err)
 	equal(t, c.AllowedVendors.Set, map[int]bool{
 		12: true,
 		23: true,
@@ -81,7 +81,7 @@ func TestConsentV2ParsePubRestrictions(t *testing.T) {
 	s := "COuQACgOuQACgM-AAAENAPCAAAAAAAAAAAAAAAAAAABgoAAQAAHAAA"
 	c := ConsentV2{}
 	err := c.Parse(s)
-	equal(t, err, nil)
+	noError(t, err)
 	expectedRestrictions := []PubRestriction{
 		{PurposeID: 1, RestrictionType: RestrictionTypeRequireConsent, Vendors: VendorSet{}},
 		{PurposeID: 2, RestrictionType: RestrictionTypeNotAllowed, Vendors: VendorSet{}},
@@ -99,7 +99,7 @@ func TestConsentV2ParsePubRestrictions(t *testing.T) {
 	s2 := c.String()
 	c2 := ConsentV2{}
 	err = c2.Parse(s2)
-	equal(t, err, nil)
+	noError(t, err)
 	expectedRestrictions[0].Vendors = vs
 	for i := range expectedRestrictions {
 		equal(t, c2.PubRestrictions[i].PurposeID, expectedRestrictions[i].PurposeID)
