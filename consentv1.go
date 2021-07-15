@@ -40,6 +40,8 @@ type ConsentV1 struct {
 	encodingType encodingType
 
 	Vendors map[int]bool
+
+	validateOnlyMode bool
 }
 
 func (c *ConsentV1) Version() byte {
@@ -249,7 +251,9 @@ func (c *ConsentV1) ParseRaw(binary []byte) error {
 			if by, ok := b.ReadByte(1); !ok {
 				return ErrUnexpectedEnd
 			} else if by == 1 {
-				c.Vendors[i] = true
+				if !c.validateOnlyMode {
+					c.Vendors[i] = true
+				}
 			}
 		}
 	case rangeType:
@@ -262,7 +266,9 @@ func (c *ConsentV1) ParseRaw(binary []byte) error {
 			defCons = true
 
 			for i := 1; i <= int(c.MaxVendorID); i++ {
-				c.Vendors[i] = true
+				if !c.validateOnlyMode {
+					c.Vendors[i] = true
+				}
 			}
 		}
 
@@ -294,7 +300,9 @@ func (c *ConsentV1) ParseRaw(binary []byte) error {
 					if defCons {
 						delete(c.Vendors, int(j))
 					} else {
-						c.Vendors[int(j)] = true
+						if !c.validateOnlyMode {
+							c.Vendors[int(j)] = true
+						}
 					}
 				}
 			}
@@ -319,4 +327,11 @@ func (c *ConsentV1) Parse(data string) error {
 func ParseV1(data string) (*ConsentV1, error) {
 	c := new(ConsentV1)
 	return c, c.Parse(data)
+}
+
+// Validate validates base64 encoded consent string
+func ValidateV1(data string) error {
+	c := new(ConsentV1)
+	c.validateOnlyMode = true
+	return c.Parse(data)
 }

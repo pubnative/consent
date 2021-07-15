@@ -32,3 +32,17 @@ func Parse(s string) (Consent, error) {
 	}
 	return nil, nil // unreachable
 }
+
+func Validate(s string) error {
+	v, err := ParseConsentVersion(s)
+	if err != nil {
+		return err
+	}
+	switch v {
+	case 1:
+		return ValidateV1(s)
+	case 2:
+		return ValidateV2(s)
+	}
+	return nil // unreachable
+}
