@@ -42,6 +42,8 @@ type ConsentV2 struct {
 	DisclosedVendors VendorSet
 	AllowedVendors   VendorSet
 	PublisherTC      *PublisherTC
+
+	validateOnlyMode bool
 }
 
 type PubRestriction struct {
@@ -206,17 +208,17 @@ func (c *ConsentV2) ParseCore(binary []byte) error {
 	c.PublisherCC = [2]byte{l1 + byte('A'), l2 + byte('A')}
 
 	var err error
-	c.VendorConsent, err = parseVendorSet(&b)
+	c.VendorConsent, err = parseVendorSet(&b, c.validateOnlyMode)
 	if err != nil {
 		return err
 	}
 
-	c.VendorLegitimateInterest, err = parseVendorSet(&b)
+	c.VendorLegitimateInterest, err = parseVendorSet(&b, c.validateOnlyMode)
 	if err != nil {
 		return err
 	}
 
-	c.PubRestrictions, err = parsePubRestrictions(&b)
+	c.PubRestrictions, err = parsePubRestrictions(&b, c.validateOnlyMode)
 	if err != nil {
 		return err
 	}
@@ -274,7 +276,7 @@ func (c *ConsentV2) ParseNonCoreSegment(binary []byte) error {
 
 // assumes segment type bits have already been consumed
 func (c *ConsentV2) parseDisclosedVendors(b *bitReader) error {
-	m, err := parseVendorSet(b)
+	m, err := parseVendorSet(b, c.validateOnlyMode)
 	if err != nil {
 		return err
 	}
@@ -284,7 +286,7 @@ func (c *ConsentV2) parseDisclosedVendors(b *bitReader) error {
 
 // assumes segment type bits have already been consumed
 func (c *ConsentV2) parseAllowedVendors(b *bitReader) error {
-	m, err := parseVendorSet(b)
+	m, err := parseVendorSet(b, c.validateOnlyMode)
 	if err != nil {
 		return err
 	}
@@ -341,6 +343,12 @@ func ParseV2(s string) (*ConsentV2, error) {
 	return c, c.Parse(s)
 }
 
+func ValidateV2(s string) error {
+	c := new(ConsentV2)
+	c.validateOnlyMode = true
+	return c.Parse(s)
+}
+
 func (c *ConsentV2) Parse(data string) error {
 	segments := strings.Split(data, ".")
 	if len(segments) == 0 {
@@ -381,7 +389,7 @@ const (
 	RestrictionTypeRequireLegitimateInterest byte = 2
 )
 
-func parsePubRestrictions(b *bitReader) ([]PubRestriction, error) {
+func parsePubRestrictions(b *bitReader, validateOnly bool) ([]PubRestriction, error) {
 	numPubRestrictions, ok := b.ReadInt(12)
 	if !ok {
 		return nil, ErrUnexpectedEnd
@@ -401,7 +409,7 @@ func parsePubRestrictions(b *bitReader) ([]PubRestriction, error) {
 		if pr.RestrictionType > 2 {
 			return []PubRestriction{}, ErrInvalidPubRestrictionType
 		}
-		vendors, maxVendorID, err := parseRange(b) // NOTE: this one can't be a bit field for some reason
+		vendors, maxVendorID, err := parseRange(b, validateOnly) // NOTE: this one can't be a bit field for some reason
 		if err != nil {
 			return nil, err
 		}
@@ -411,7 +419,7 @@ func parsePubRestrictions(b *bitReader) ([]PubRestriction, error) {
 	return restrictions, nil
 }
 
-func parseVendorSet(b *bitReader) (VendorSet, error) {
+func parseVendorSet(b *bitReader, validateOnly bool) (VendorSet, error) {
 	maxVendorID, ok := b.ReadInt(16)
 	if !ok {
 		return VendorSet{}, ErrUnexpectedEnd
@@ -423,9 +431,9 @@ func parseVendorSet(b *bitReader) (VendorSet, error) {
 	var err error
 	var set map[int]bool
 	if isRangeEncoding {
-		set, _, err = parseRange(b)
+		set, _, err = parseRange(b, validateOnly)
 	} else {
-		set, err = parseBitField(b, int(maxVendorID))
+		set, err = parseBitField(b, int(maxVendorID), validateOnly)
 	}
 
 	if err != nil {
@@ -435,7 +443,7 @@ func parseVendorSet(b *bitReader) (VendorSet, error) {
 	return VendorSet{Set: set, maxVendorID: int(maxVendorID)}, nil
 }
 
-func parseRange(b *bitReader) (map[int]bool, int, error) { // second return value is max vendor id in the set
+func parseRange(b *bitReader, validateOnly bool) (map[int]bool, int, error) { // second return value is max vendor id in the set
 	numEntries, ok := b.ReadInt(12)
 	var maxVendorID int
 	if !ok {
@@ -456,7 +464,9 @@ func parseRange(b *bitReader) (map[int]bool, int, error) { // second return valu
 			}
 		}
 		for id := startOrOnlyVendorID; id <= endVendorID; id++ {
-			vendors[int(id)] = true
+			if !validateOnly {
+				vendors[int(id)] = true
+			}
 			maxVendorID = int(id)
 		}
 	}
@@ -464,7 +474,7 @@ func parseRange(b *bitReader) (map[int]bool, int, error) { // second return valu
 	return vendors, maxVendorID, nil
 }
 
-func parseBitField(b *bitReader, maxVendorID int) (map[int]bool, error) {
+func parseBitField(b *bitReader, maxVendorID int, validateOnly bool) (map[int]bool, error) {
 	vendors := map[int]bool{}
 	for vendorID := 1; vendorID <= maxVendorID; vendorID++ {
 		vendorBit, ok := b.ReadBit()
@@ -472,7 +482,9 @@ func parseBitField(b *bitReader, maxVendorID int) (map[int]bool, error) {
 			return nil, ErrUnexpectedEnd
 		}
 		if vendorBit {
-			vendors[vendorID] = true
+			if !validateOnly {
+				vendors[vendorID] = true
+			}
 		}
 	}
 	return vendors, nil

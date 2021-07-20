@@ -1,12 +1,16 @@
 package consent
 
 import (
+	"encoding/base64"
 	"testing"
 )
 
 const (
 	csv1 = "BOEFEAyOEFEAyAHABDENAI4AAAB9vABAASA"
 	csv2 = "COtybn4PA_zT4KjACBENAPCIAEBAAECAAIAAAAAAAAAA"
+	invalidVersionCS = "DOtybn4PA_zT4KjACBENAPCIAEBAAECAAIAAAAAAAAAA"
+	truncatedCS = "COtybn4PAA"
+	nonB64CS = "COtybn4PA*zT4KjACBENAPCIAEBAAECAAIAAAAAAAAAA"
 )
 
 func TestParseVersion(t *testing.T) {
@@ -42,4 +46,22 @@ func TestParseConsentString(t *testing.T) {
 		t.Fail()
 	}
 	equal(t, 2, v2.CmpVersion)
+}
+
+func TestValidateConsentString(t *testing.T) {
+	err := Validate(csv1)
+	equal(t, nil, err)
+
+	err = Validate(csv2)
+	equal(t, nil, err)
+
+	err = Validate(invalidVersionCS)
+	equal(t, ErrUnsupported, err)
+
+	err = Validate(nonB64CS)
+	_, isBase64Error := err.(base64.CorruptInputError)
+	equal(t, true, isBase64Error)
+
+	err = Validate(truncatedCS)
+	equal(t, ErrUnexpectedEnd, err)
 }
