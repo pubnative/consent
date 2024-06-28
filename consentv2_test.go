@@ -125,7 +125,7 @@ func TestConsentV2ParsePublisherTC(t *testing.T) {
 }
 
 func TestConsentV2_2Parse(t *testing.T) {
-	s := "COtwGEAPA9dwAKjACBENA6EIAEBAAECAAIAAAAAAAAAA.QAAA.IAAA"
+	s := "COtwGEAPA9dwAKjACBENA6EIAEBAAECAAIAAAAAAAAAA"
 	c := ConsentV2{}
 
 	err := c.Parse(s)
@@ -147,11 +147,11 @@ func TestConsentV2_2Parse(t *testing.T) {
 	equal(t, c.PurposesConsent, [24]bool{false, true, false, false, false, false, false, false, false, true})
 	equal(t, c.PurposesLITransparency, [24]bool{false, true, false, false, false, false, false, false, true})
 
-	// equal(t, c.String(), s)
+	equal(t, c.String(), s)
 }
 
 func TestConsentV2_2ParseVendorLegitimateInterest(t *testing.T) {
-	s := "COrBaYAOrVMAAACABBENA6EIAD-AAAAAAACAAxQBQALgAlABeADUAMQBAwBQASgAvABqAGIAQIAA.QAAA.IAAA"
+	s := "COrBaYAOrVMAAACABBENA6EIAD-AAAAAAACAAxQBQALgAlABeADUAMQBAwBQASgAvABqAGIAQIAA"
 	c := ConsentV2{}
 
 	err := c.Parse(s)
@@ -164,11 +164,11 @@ func TestConsentV2_2ParseVendorLegitimateInterest(t *testing.T) {
 		129: true,
 	})
 
-	// equal(t, c.String(), s)
+	equal(t, c.String(), s)
 }
 
 func TestConsentV2_2ParseDisclosedAndAllowedVendors(t *testing.T) {
-	s := "COrBaYAOrVMAAACABBENA6EAAAAAAAAAAACAAAAAAAAA.QAagAQAgAIAggAAA.IBAwBgALgAlABeADUAMQAgQA"
+	s := "COrBaYAOrVMAAACABBENA6EAAAAAAAAAAACAAAAAAAAA.IBAwBgALgAlABeADUAMQAgQ.QAagAQAgAIAggA"
 	c := ConsentV2{}
 	err := c.Parse(s)
 	noError(t, err)
@@ -189,5 +189,5 @@ func TestConsentV2_2ParseDisclosedAndAllowedVendors(t *testing.T) {
 		129: true,
 	})
 
-	// equal(t, c.String(), s)
+	equal(t, c.String(), s)
 }
