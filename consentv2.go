@@ -57,7 +57,7 @@ func (c *ConsentV2) Version() byte {
 }
 
 type VendorSet struct {
-	maxVendorID int
+	MaxVendorID int
 	Set         map[int]bool
 }
 
@@ -155,7 +155,7 @@ func (c *ConsentV2) writeCoreString(b *bitWriter) {
 		b.AppendInt(int64(pubRestriction.PurposeID), 6)
 		b.AppendByte(pubRestriction.RestrictionType, 2)
 		numEntries, _ := pubRestriction.Vendors.getRangeSizes()
-		AppendRange(b, pubRestriction.Vendors.Set, pubRestriction.Vendors.maxVendorID, numEntries)
+		AppendRange(b, pubRestriction.Vendors.Set, pubRestriction.Vendors.MaxVendorID, numEntries)
 	}
 }
 
@@ -413,7 +413,7 @@ func parsePubRestrictions(b *bitReader, validateOnly bool) ([]PubRestriction, er
 		if err != nil {
 			return nil, err
 		}
-		pr.Vendors = VendorSet{Set: vendors, maxVendorID: maxVendorID}
+		pr.Vendors = VendorSet{Set: vendors, MaxVendorID: maxVendorID}
 		restrictions = append(restrictions, pr)
 	}
 	return restrictions, nil
@@ -440,7 +440,7 @@ func parseVendorSet(b *bitReader, validateOnly bool) (VendorSet, error) {
 		return VendorSet{}, err
 	}
 
-	return VendorSet{Set: set, maxVendorID: int(maxVendorID)}, nil
+	return VendorSet{Set: set, MaxVendorID: int(maxVendorID)}, nil
 }
 
 func parseRange(b *bitReader, validateOnly bool) (map[int]bool, int, error) { // second return value is max vendor id in the set
@@ -493,17 +493,17 @@ func parseBitField(b *bitReader, maxVendorID int, validateOnly bool) (map[int]bo
 func (s *VendorSet) AppendRangeOrBitField(b *bitWriter) {
 	numRangeEntries, rangeSizeInBits := s.getRangeSizes()
 	isRange := false
-	if rangeSizeInBits < s.maxVendorID {
+	if rangeSizeInBits < s.MaxVendorID {
 		isRange = true
 	}
 
-	b.AppendInt(int64(s.maxVendorID), 16)
+	b.AppendInt(int64(s.MaxVendorID), 16)
 	if isRange {
 		b.AppendByte(1, 1) // encoding type
-		AppendRange(b, s.Set, s.maxVendorID, numRangeEntries)
+		AppendRange(b, s.Set, s.MaxVendorID, numRangeEntries)
 	} else {
 		b.AppendByte(0, 1) // encoding type
-		AppendBitField(b, s.Set, s.maxVendorID)
+		AppendBitField(b, s.Set, s.MaxVendorID)
 	}
 }
 
@@ -519,11 +519,11 @@ func AppendBitField(b *bitWriter, vendorSet map[int]bool, maxVendorID int) {
 
 func (v *VendorSet) getRangeSizes() (int, int) { // numEntries, number of bits
 	var numEntries, bitCount int
-	for vendorID := 1; vendorID <= v.maxVendorID; vendorID++ {
+	for vendorID := 1; vendorID <= v.MaxVendorID; vendorID++ {
 		if v.Set[vendorID] {
 			rangeStart := vendorID
 			rangeEnd := vendorID
-			for i := rangeStart + 1; i <= v.maxVendorID && v.Set[i]; i++ {
+			for i := rangeStart + 1; i <= v.MaxVendorID && v.Set[i]; i++ {
 				rangeEnd = i
 			}
 			if rangeStart == rangeEnd { // single entry

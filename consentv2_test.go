@@ -94,7 +94,7 @@ func TestConsentV2ParsePubRestrictions(t *testing.T) {
 	}
 	equal(t, c.String(), s)
 
-	vs := VendorSet{Set: map[int]bool{1: true, 3: true, 4: true}, maxVendorID: 4}
+	vs := VendorSet{Set: map[int]bool{1: true, 3: true, 4: true}, MaxVendorID: 4}
 	c.PubRestrictions[0].Vendors = vs
 	s2 := c.String()
 	c2 := ConsentV2{}
@@ -251,7 +251,7 @@ func TestConsentV2_2ParsePubRestrictions(t *testing.T) {
 	}
 	equal(t, c.String(), s)
 
-	vs := VendorSet{Set: map[int]bool{1: true, 3: true, 4: true}, maxVendorID: 4}
+	vs := VendorSet{Set: map[int]bool{1: true, 3: true, 4: true}, MaxVendorID: 4}
 	c.PubRestrictions[0].Vendors = vs
 	s2 := c.String()
 	c2 := ConsentV2{}
