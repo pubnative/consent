@@ -156,6 +156,13 @@ func TestConsentV2_2ParseVendorLegitimateInterest(t *testing.T) {
 
 	err := c.Parse(s)
 	equal(t, err, nil)
+	equal(t, c.VendorConsent.Set, map[int]bool{
+		23: true,
+		37: true,
+		47: true,
+		53: true,
+		98: true,
+	})
 	equal(t, c.VendorLegitimateInterest.Set, map[int]bool{
 		37:  true,
 		47:  true,
