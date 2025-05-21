@@ -47,10 +47,7 @@ func (b *bitWriter) AppendBits(bits bitWriter) {
 
 func (b *bitWriter) AppendInt(add int64, size uint) {
 	for size > 0 {
-		byteSize := size
-		if byteSize > 8 {
-			byteSize = 8
-		}
+		byteSize := min(size, 8)
 		size -= byteSize
 		b.AppendByte(byte(add>>size), byteSize)
 	}
@@ -101,10 +98,7 @@ func (b *bitReader) ReadByte(size uint) (byte, bool) {
 func (b *bitReader) ReadInt(size uint) (int64, bool) {
 	var out int64
 	for size > 0 {
-		bitSize := size
-		if bitSize > 8 {
-			bitSize = 8
-		}
+		bitSize := min(size, 8)
 		size -= bitSize
 		v, ok := b.ReadByte(bitSize)
 		if !ok {
