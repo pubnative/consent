@@ -449,9 +449,9 @@ func parseRange(b *bitReader, validateOnly bool) (map[int]bool, int, error) { //
 	if !ok {
 		return nil, 0, ErrUnexpectedEnd
 	}
-	vendors := map[int]bool{}
+	vendors := make(map[int]bool)
 	allocated := false
-	for range int(numEntries) {
+	for range numEntries {
 		isARange, _ := b.ReadBit()
 		startOrOnlyVendorID, ok := b.ReadInt(16)
 		if !ok {
@@ -467,12 +467,12 @@ func parseRange(b *bitReader, validateOnly bool) (map[int]bool, int, error) { //
 		if !validateOnly && !allocated {
 			allocated = true
 			/**
-			We want to get a good idea of how big the vendors map is going to be before adding elements
-			to it, or esle it will grow incrementally and will trigger costly splitting and rehashing
-			events. We use the number of vendros in the first entry as a proxy for the average number
+			// We want to get a good idea of how big the vendors map is going to be before adding elements
+			to it, or else it will grow incrementally and will trigger costly splitting and rehashing
+			events. We use the number of vendors in the first entry as a proxy for the average number
 			of vendors in each entry. Testing in production shows it works well enough.
 			**/
-			vendors = make(map[int]bool, 2*numEntries*(endVendorID-startOrOnlyVendorID+1))
+			vendors = make(map[int]bool, numEntries*(endVendorID-startOrOnlyVendorID+1))
 		}
 		for id := startOrOnlyVendorID; id <= endVendorID; id++ {
 			if !validateOnly {
